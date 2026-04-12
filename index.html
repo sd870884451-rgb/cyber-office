@@ -134,6 +134,22 @@ canvas { display:block; }
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.158.0/examples/jsm/"}}
 </script>
+<script>
+window.__cdnErr = false;
+window.onerror = function(msg,src,line){window.__cdnErr=true;return false;};
+window.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    if(!window.__sceneReady){
+      document.getElementById('loading-screen').innerHTML=
+        '<div style="color:#0df;font-family:monospace;font-size:14px;padding:40px;text-align:center">'+
+        '⚠ CDN 加载超时 (可能是网络问题)<br><br>'+
+        '<a href="file:///C:/Users/Administrator/.qclaw/workspace/cyber-office/index.html" '+
+        'style="color:#0df">👉 点击打开本地版本</a><br><br>'+
+        '或开启代理/VPN后刷新</div>';
+    }
+  },8000);
+});
+</script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
