@@ -9,7 +9,6 @@
 body{background:#000;overflow:hidden;font-family:'Share Tech Mono',monospace;user-select:none;cursor:grab;}
 body.drag{cursor:grabbing;}
 canvas{display:block;}
-/* LOADING */
 #loading{position:fixed;inset:0;background:linear-gradient(135deg,#01010e,#0a0a1f,#01010e);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .9s;}
 #loading.out{opacity:0;pointer-events:none;}
 .lt{text-align:center;margin-bottom:32px;}
@@ -22,7 +21,6 @@ canvas{display:block;}
 #lpst{font-size:11px;color:#4a9eff;letter-spacing:2px;}
 .enter-btn{padding:14px 40px;font-size:14px;font-family:inherit;letter-spacing:4px;background:transparent;border:1px solid #4a9eff;color:#4a9eff;cursor:pointer;text-transform:uppercase;border-radius:3px;transition:all .3s;position:relative;overflow:hidden;display:none;}
 .enter-btn:hover{background:#4a9eff22;box-shadow:0 0 20px #4a9eff55;color:#fff;border-color:#fff;}
-/* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none;}
 #hud.show{display:block;}
 #top-bar{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;}
