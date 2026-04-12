@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="three_bundled.js"></script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>皮皮虾 · 赛博办公室 v2.0</title>
@@ -221,13 +223,19 @@ setTimeout(()=>{
 }, 10000);
 </script>
 <script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-window.__threeLoaded = true;
-
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// THREE and OrbitControls provided by three_bundled.js (no CDN needed)
+const THREE = window.THREE;
+const OrbitControls = window.OrbitControls;
+if (!THREE) {
+  window.__cdnErr = true;
+  window.__sceneReady = true;
+  document.getElementById('loading').innerHTML = '<div style="text-align:center;padding-top:40px;color:#ff4444;font-size:15px;">&#x274C; Three.js 加载失败（请刷新重试）</div>';
+  const bt = document.getElementById("lent");
+  if(bt) bt.style.display = "flex";
+  const lpct = document.getElementById("lpct");
+  if(lpct) lpct.textContent = "ERR";
+}
+if (THREE) {
 
 // RENDERER
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -865,6 +873,7 @@ setTimeout(()=>{
   notif('&#x1F990; 赛博办公室 v2.0 上线！拖动旋转 &middot; 滚轮缩放 &middot; 点击节点互动');
 }, 2600);
 
+}
 animate();
 </script>
 </body>
