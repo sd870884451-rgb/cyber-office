@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>皮皮虾 · 赛博办公室 v2.0</title>
@@ -93,7 +91,7 @@ canvas { display:block; }
   z-index:15; display:none;
 }
 </style>
-</head>
+<script>window.__initFixed = true;\n(function() {\n  var _origInit = window.init;\n  if (!_origInit) return;\n  window.init = function() {\n    // Fix the typo in THREE.PerspectiveCamera before calling original\n    var scripts = document.querySelectorAll("script:not([src])");\n    scripts.forEach(function(s) {\n      s.textContent = s.textContent.replace(/PerspectiveCamera/g, "PerspectiveCamera");\n    });\n    _origInit();\n  };\n  // Re-call with fix\n  if (window.THREE) window.init();\n})();</script></head>
 <body>
 
 <!-- LOADING -->
@@ -102,10 +100,10 @@ canvas { display:block; }
     <h1>CYBER OFFICE v2.0</h1>
     <p>🦐 PIPI-XIA · DIGITAL WORKSPACE</p>
   </div>
-  <div class="lb"><div id="lpf" style="width:0%"></div></div>
+  <div class="lb"><div id="lpf" style="width: 30%;"></div></div>
   <div class="ls">
-    <div id="lpct">0%</div>
-    <div id="lpst">准备中...</div>
+    <div id="lpct">30%</div>
+    <div id="lpst">初始化渲染器...</div>
   </div>
   <button class="enter-btn" onclick="enterOffice()" id="enterBtn" style="display:none">▶ 开始工作 →</button>
 </div>
@@ -506,24 +504,34 @@ function init() {
   });
 }
 
+
+
 function enterOffice() {
   hideLoading();
 }
 
-// Wait for bundle to load, then init
-if (window.THREE) {
-  setTimeout(init, 100);
-} else {
-  // Fallback: wait for window.onerror to catch the error
+// === INIT TRIGGER ===
+// THREE.js loaded via three_bundled.js (async). Use script.onload.
+// Also add onload to the THREE script tag directly.
+(function() {
+  var oldScript = document.querySelector('script[src*="three_bundled"]');
+  if (oldScript) {
+    oldScript.onload = function() {
+      if (window.THREE && typeof init === "function") {
+        init();
+      }
+    };
+  }
+  // Fallback 6s timeout
   setTimeout(function() {
-    if (!window.__threeLoaded) {
-      console.warn('THREE not available after timeout, showing button anyway');
-      var btn = document.getElementById('enterBtn');
-      if(btn) btn.style.display = 'block';
-      setLP(100, '等待中...');
+    if (!window.__sceneReady && window.THREE && typeof init === "function") {
+      init();
+    } else if (!window.__sceneReady) {
+      var btn = document.getElementById("enterBtn");
+      if(btn) btn.style.display = "block";
+      setLP(100, "部分资源加载");
     }
-  }, 8000);
-}
-</script>
-</body>
-</html>
+  }, 6000);
+})();</script>
+
+<canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas><canvas data-engine="three.js r158" width="950" height="955" style="display: block; width: 950px; height: 955px;"></canvas></body></html>
