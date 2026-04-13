@@ -2,135 +2,96 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>X5 WebGL Debug</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>X5 Debug - Self-contained</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:monospace;background:#111;color:#0f0;overflow:hidden}
-#log{position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:16px;font-size:13px;line-height:1.8;z-index:9999;background:rgba(0,0,0,.92)}
-#log div{margin-bottom:2px}
-.ok{color:#0f0}
-.err{color:#f55}
-.warn{color:#fa0}
-.info{color:#5af}
-h1{font-size:18px;color:#fff;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #333}
+*{margin:0;padding:0}
+body{background:#111;color:#0f0;font-family:monospace;font-size:14px;overflow-x:hidden}
+#log{margin:10px;padding:10px;background:rgba(0,0,0,0.85);border:1px solid #333;border-radius:4px;min-height:60px}
+.l{margin:3px 0;padding:2px 6px;border-left:3px solid}
+.l.info{border-color:#5af;color:#5af}
+.l.ok{border-color:#0f0;color:#0f0}
+.l.err{border-color:#f55;color:#f55}
+.l.warn{border-color:#fa0;color:#fa0}
+canvas{display:block;margin:10px;border:2px solid #333}
+#fallback{display:none;padding:20px;color:#fff;font-size:20px;text-align:center;background:#333;margin:20px}
 </style>
 </head>
 <body>
-<div id="log"><h1>X5 WebGL Debug Log</h1></div>
-<script src="three_bundled.js"></script>
+<div id="log"></div>
+<div id="fallback"></div>
+<canvas id="test1" width="400" height="150"></canvas>
+<canvas id="test2" width="400" height="150"></canvas>
+
 <script>
-// Enhanced log that writes to screen
-var logDiv = document.getElementById('log');
-function log(msg, type) {
+// NO external dependencies - self-contained test
+var log = function(msg, type) {
   type = type || 'info';
   var d = document.createElement('div');
-  d.className = type;
-  d.textContent = '[' + new Date().toISOString().substring(11, 23) + '] ' + msg;
-  logDiv.appendChild(d);
-  logDiv.scrollTop = logDiv.scrollHeight;
+  d.className = 'l ' + type;
+  d.textContent = msg;
+  document.getElementById('log').appendChild(d);
   console.log('[' + type.toUpperCase() + ']', msg);
-}
-function err(msg) { log(msg, 'err'); }
-function warn(msg) { log(msg, 'warn'); }
-function ok(msg) { log(msg, 'ok'); }
+};
 
-log('Page loaded');
-log('window.THREE type: ' + typeof THREE, typeof THREE === 'object' ? 'ok' : 'err');
+// TEST 1: Pure Canvas 2D (always works)
+(function() {
+  var c = document.getElementById('test1');
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#220033';
+  ctx.fillRect(0, 0, 400, 150);
+  ctx.fillStyle = '#ff4466';
+  ctx.fillRect(50, 30, 80, 80);
+  ctx.fillStyle = '#44aaff';
+  ctx.fillRect(160, 50, 100, 60);
+  ctx.fillStyle = '#ffcc00';
+  ctx.fillRect(290, 20, 50, 50);
+  ctx.fillStyle = '#fff';
+  ctx.font = '14px monospace';
+  ctx.fillText('Canvas2D Test - Should show colors above', 10, 140);
+  log('Canvas2D 2D context: ' + (ctx ? 'OK' : 'NULL'), ctx ? 'ok' : 'err');
+})();
 
-if (typeof THREE === 'undefined') {
-  err('THREE is undefined! three_bundled.js failed to load.');
-} else {
-  log('THREE loaded, version: ' + THREE.REVISION);
-  
-  // Test 1: Can we create a scene?
-  try {
-    var s = new THREE.Scene();
-    ok('Scene created OK');
-  } catch(e) { err('Scene creation failed: ' + e.message); }
-  
-  // Test 2: Can we create a camera?
-  try {
-    var cam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    ok('Camera created OK: ' + JSON.stringify({fov:cam.fov,aspect:cam.aspect,near:cam.near,far:cam.far}));
-  } catch(e) { err('Camera failed: ' + e.message); }
-  
-  // Test 3: Can we create a WebGLRenderer?
-  var r1 = null, r2 = null, r3 = null;
-  try { r1 = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); ok('Renderer #1 (high-perf) OK'); } catch(e) { err('Renderer #1 failed: ' + e.message); }
-  if (!r1) { try { r2 = new THREE.WebGLRenderer({antialias:false}); ok('Renderer #2 (basic) OK'); } catch(e) { err('Renderer #2 failed: ' + e.message); } }
-  if (!r1 && !r2) { try { r3 = new THREE.WebGLRenderer(); ok('Renderer #3 (default) OK'); } catch(e) { err('Renderer #3 failed: ' + e.message); } }
-  
-  var renderer = r1 || r2 || r3;
-  
-  if (renderer) {
-    log('Final renderer: ' + (renderer === r1 ? 'high-perf' : renderer === r2 ? 'basic' : 'default'));
-    renderer.setSize(400, 300);
-    document.body.appendChild(renderer.domElement);
-    log('Canvas appended, size: ' + renderer.domElement.width + 'x' + renderer.domElement.height);
-    log('Canvas style: ' + JSON.stringify({w:renderer.domElement.style.width, h:renderer.domElement.style.height, display:renderer.domElement.style.display}));
-    
-    // Test 4: Can we get the WebGL context?
-    var ctx = renderer.domElement.getContext('webgl') || renderer.domElement.getContext('experimental-webgl');
-    log('WebGL context from renderer canvas: ' + (ctx ? 'OK (type: ' + ctx.constructor.name + ')' : 'NULL'), ctx ? 'ok' : 'err');
-    
-    // Test 5: Direct canvas test
-    var testCanvas = document.createElement('canvas');
-    testCanvas.width = 200; testCanvas.height = 200;
-    var gl1 = testCanvas.getContext('webgl');
-    var gl2 = testCanvas.getContext('experimental-webgl');
-    var gl3 = testCanvas.getContext('webgl2');
-    log('Direct canvas WebGL1: ' + (gl1 ? 'OK' : 'NULL'), gl1 ? 'ok' : 'err');
-    log('Direct canvas WebGL2: ' + (gl3 ? 'OK' : 'NULL'), gl3 ? 'ok' : 'warn');
-    log('Direct canvas exp-webgl: ' + (gl2 ? 'OK' : 'NULL'), gl2 ? 'ok' : 'err');
-    
-    // Test 6: Can we render a simple cube?
-    if (ctx) {
-      try {
-        var cubeGeo = new THREE.BoxGeometry(1, 1, 1);
-        var cubeMat = new THREE.MeshBasicMaterial({color: 0xff0000});
-        var cube = new THREE.Mesh(cubeGeo, cubeMat);
-        s.add(cube);
-        cam.position.z = 5;
-        renderer.render(s, cam);
-        ok('Simple cube render OK');
-        
-        // Check the canvas pixels
-        setTimeout(function() {
-          try {
-            var pixels = new Uint8Array(4);
-            renderer.domElement.getContext('webgl').readPixels(200, 150, 1, 1, renderer.domElement.getContext('webgl').RGBA, renderer.domElement.getContext('webgl').UNSIGNED_BYTE, pixels);
-            ok('Center pixel RGBA: ' + Array.from(pixels).join(',') + ' (R=255 expected)');
-          } catch(e) { err('Pixel read failed: ' + e.message); }
-        }, 500);
-        
-      } catch(e) { err('Cube render failed: ' + e.message); }
-    } else {
-      err('No WebGL context available - cube render skipped');
-    }
-    
-    // Try canvas 2D fallback
-    warn('Testing Canvas2D renderer as fallback...');
-    try {
-      var c2d = new THREE.CanvasRenderer();
-      c2d.setSize(200, 150);
-      document.body.appendChild(c2d.domElement);
-      c2d.render(s, cam);
-      ok('Canvas2D renderer: OK (fallback works!)');
-    } catch(e) { err('Canvas2D renderer failed: ' + e.message); }
-    
-  } else {
-    err('All WebGL renderer attempts failed!');
+// TEST 2: WebGL (no Three.js)
+(function() {
+  var c = document.getElementById('test2');
+  var ctx = c.getContext('webgl') || c.getContext('experimental-webgl') || c.getContext('webkit-3d');
+  log('WebGL context from #test2: ' + (ctx ? 'OK (type=' + ctx.constructor.name + ')' : 'NULL'), ctx ? 'ok' : 'err');
+  if (!ctx) {
+    log('WebGL NOT available in this browser', 'err');
+    document.getElementById('fallback').style.display = 'block';
+    document.getElementById('fallback').innerHTML = '&#9888;&#65039; 您的浏览器不支持 WebGL！<br>请用 Chrome / Edge / Safari 打开此页面。<br><br>X5 内核的 WebGL 可能被禁用或不支持。';
+    return;
   }
-}
+  // Try to use WebGL
+  var gl = ctx;
+  gl.clearColor(0.05, 0.02, 0.15, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  log('WebGL clearColor: OK (set bg to dark blue)', 'ok');
+  
+  // Check gl.POINTS
+  log('gl.POINTS = ' + gl.POINTS, 'info');
+  log('Max texture size: ' + gl.getParameter(gl.MAX_TEXTURE_SIZE), 'info');
+  log('Renderer: ' + gl.getParameter(gl.RENDERER), 'info');
+  log('Vendor: ' + gl.getParameter(gl.VENDOR), 'info');
+  
+  // Read back a pixel to confirm rendering
+  var px = new Uint8Array(4);
+  gl.readPixels(200, 75, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  log('Pixel at center (should be dark blue ~13,5,38): RGBA=' + Array.from(px).join(','), 'ok');
+  log('WebGL rendering works! Canvas should show dark blue background.', 'ok');
+})();
 
-// Final status
+// SUMMARY
 setTimeout(function() {
-  log('--- DIAGNOSTIC COMPLETE ---');
-  log('If all items are green/ok: Three.js + WebGL works in this browser');
-  log('If renderer items are red: WebGL is not available - use Canvas2D fallback');
-  log('If THREE is undefined: three_bundled.js failed to load');
-}, 2000);
+  log('--- DIAGNOSTIC COMPLETE ---', 'info');
+  var fb = document.getElementById('fallback');
+  if (fb.style.display !== 'none') {
+    log('RESULT: WebGL NOT available. Use Chrome/Edge/Safari.', 'err');
+  } else {
+    log('RESULT: WebGL appears to work. Black canvas = Three.js issue.', 'warn');
+  }
+}, 1500);
 </script>
 </body>
 </html>
