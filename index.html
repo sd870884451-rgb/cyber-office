@@ -110,7 +110,13 @@ window.onerror=function(msg,src,line,col,err){if(src&&(src.indexOf('three_bundle
 function enterOffice(){hideLoading()}
 function init(){
   setLP(30,'初始化渲染器...');
-  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+  var renderer;
+  try {
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+  } catch(e) {
+    try { renderer=new THREE.WebGLRenderer({antialias:false}); } catch(e2) { renderer=null; }
+  }
+  if(!renderer){var eb=document.getElementById('err-banner');if(eb){eb.style.display='block';eb.textContent='WebGL不可用，请用Chrome/Firefox打开！'}setLP(100,'渲染器初始化失败');return}
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setSize(window.innerWidth,window.innerHeight);
   renderer.shadowMap.enabled=true;
