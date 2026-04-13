@@ -110,12 +110,13 @@ window.onerror=function(msg,src,line,col,err){if(src&&(src.indexOf('three_bundle
 function enterOffice(){hideLoading()}
 function init(){
   setLP(30,'初始化渲染器...');
-  var renderer;
-  try {
-    renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  } catch(e) {
-    try { renderer=new THREE.WebGLRenderer({antialias:false}); } catch(e2) { renderer=null; }
-  }
+  console.log('[CyberOffice] init running, THREE.REVISION='+(typeof THREE!=='undefined'?THREE.REVISION:'MISSING'));
+  var renderer=null;
+  var _tc=document.createElement('canvas');var _gl=_tc.getContext('webgl')||_tc.getContext('experimental-webgl');
+  if(!_gl){var _eb=document.getElementById('err-banner');if(_eb){_eb.style.display='block';_eb.textContent='您的浏览器不支持WebGL！请用Chrome/Edge/Safari打开';}setLP(100,'WebGL不可用');return}
+  try{var _r=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});if(_r&&_r.getContext())renderer=_r;}catch(e){}
+  if(!renderer)try{var _r2=new THREE.WebGLRenderer({antialias:false});if(_r2&&_r2.getContext())renderer=_r2;}catch(e){}
+  if(!renderer){var _eb2=document.getElementById('err-banner');if(_eb2){_eb2.style.display='block';_eb2.textContent='渲染器初始化失败，请用Chrome打开！';}setLP(100,'渲染器初始化失败');return}
   if(!renderer){var eb=document.getElementById('err-banner');if(eb){eb.style.display='block';eb.textContent='WebGL不可用，请用Chrome/Firefox打开！'}setLP(100,'渲染器初始化失败');return}
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setSize(window.innerWidth,window.innerHeight);
