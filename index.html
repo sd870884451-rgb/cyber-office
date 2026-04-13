@@ -99,7 +99,7 @@ canvas{display:block;}
 <div id="notif"></div>
 <div id="err-banner"></div>
 
-<script src="three_bundled.js" onerror="window.__cdnErr=true;document.getElementById('enterBtn').style.display='block';document.getElementById('lpct').textContent='ERR';document.getElementById('lpst').textContent='CDN加载失败';" onload="if(window.THREE&&typeof init==='function')init();"></script>
+<script src="three_bundled.js"></script>
 
 <script>
 window.__cdnErr=false;window.__sceneReady=false;window.__threeLoaded=false;
@@ -193,6 +193,20 @@ function init(){
   window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)})}
 // Fallback if THREE never loads
 setTimeout(function(){if(!window.__sceneReady){document.getElementById('enterBtn').style.display='block';setLP(100,'部分资源加载')}},12000);
+// Auto-start watcher: poll until THREE is loaded AND init() is defined (max 5s)
+// This fixes the race condition where onload fires before init() is declared
+window.__startupTried = false;
+function __tryStart() {
+  if (window.__startupTried) return;
+  if (window.THREE && typeof init === 'function') {
+    window.__startupTried = true;
+    clearInterval(window.__startInterval);
+    init();
+  }
+}
+window.__startInterval = setInterval(__tryStart, 50);
+setTimeout(function() { clearInterval(window.__startInterval); }, 5000);
+
 </script>
 </body>
 </html>
